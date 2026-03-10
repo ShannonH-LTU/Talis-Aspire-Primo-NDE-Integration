@@ -1,4 +1,13 @@
-# CustomModule
+# Talis Aspire Primo NDE Integration
+
+We are working on building an integration with Primo NDE.
+
+We will update this README with Talis Aspire specific instructions when it is ready for use.
+i.e. This is not released or ready for use yet!
+
+---
+
+Original README Info below this line
 
 ## ✨ New Feature (9th November 2025): Support for all customization files in assets folder:
 All files that are you are able to customize through the assets folder of your customization package are now supported for preview when using the custom module in proxy mode.
