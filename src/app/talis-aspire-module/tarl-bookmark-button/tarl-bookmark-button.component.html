@@ -1,0 +1,11 @@
+<div *ngIf="displayButton && bookmarkableItems.length > 0" class="bookmark-button-container">
+  <button
+    mat-stroked-button
+    color="primary"
+    class="quicklink-button"
+    *ngFor="let item of bookmarkableItems"
+    (click)="onBookmarkClick(item.url)"
+    [title]="item.title">
+    {{ item.actionText }}
+  </button>
+</div>
