@@ -1,0 +1,30 @@
+// Cited on Reading Lists styling
+
+mat-divider {
+  margin-top: 0.625rem;
+}
+
+.section-title {
+  margin: 1rem 0 0.5rem 0;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.reading-lists {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+
+  li {
+    margin-bottom: 0.5rem;
+
+    a {
+      color: var(--primary-color, #1976d2);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}

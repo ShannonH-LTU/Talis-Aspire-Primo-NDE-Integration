@@ -1,0 +1,15 @@
+<div *ngIf="listsFound && listEntries.length > 0">
+  <mat-divider role="separator" class="mat-divider nde-divider full-display-divider"></mat-divider>
+
+  <h4 class="section-title">{{ displayLabel }}</h4>
+
+  <ul class="reading-lists">
+    <li *ngFor="let list of listEntries">
+      <a [href]="list.url"
+         target="_blank"
+         [attr.aria-label]="list.name + ' - Opens in new tab'">
+        {{ list.name }}
+      </a>
+    </li>
+  </ul>
+</div>

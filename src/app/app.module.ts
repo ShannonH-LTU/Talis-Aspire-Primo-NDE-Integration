@@ -6,6 +6,11 @@ import {Router} from "@angular/router";
 import {selectorComponentMap} from "./talis-aspire-module/customComponentMappings";
 import {TranslateModule} from "@ngx-translate/core";
 import { CommonModule } from '@angular/common';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+  withJsonpSupport,
+} from '@angular/common/http';
 import { AutoAssetSrcDirective } from './services/auto-asset-src.directive';
 import {SHELL_ROUTER} from "./injection-tokens";
 
@@ -13,41 +18,46 @@ import {SHELL_ROUTER} from "./injection-tokens";
 
 export const AppModule = ({providers, shellRouter}: {providers:any, shellRouter: Router}) => {
    @NgModule({
-    declarations: [
-      AppComponent,
-      AutoAssetSrcDirective
-    ],
-    exports: [AutoAssetSrcDirective],
-    imports: [
-      BrowserModule,
-      CommonModule,
-      TranslateModule.forRoot({})
-    ],
-    providers: [...providers, {provide: SHELL_ROUTER, useValue: shellRouter}],
-    bootstrap: []
-  })
-  class AppModule implements DoBootstrap{
-    private webComponentSelectorMap = new Map<string,  NgElementConstructor<unknown>>();
+     declarations: [AppComponent, AutoAssetSrcDirective],
+     exports: [AutoAssetSrcDirective],
+     imports: [BrowserModule, CommonModule, TranslateModule.forRoot({})],
+     providers: [
+       ...providers,
+       { provide: SHELL_ROUTER, useValue: shellRouter },
+       provideHttpClient(withInterceptorsFromDi(), withJsonpSupport()),
+     ],
+     bootstrap: [],
+   })
+   class AppModule implements DoBootstrap {
+     private webComponentSelectorMap = new Map<
+       string,
+       NgElementConstructor<unknown>
+     >();
 
-    constructor(private injector: Injector, private router: Router) {
-      router.dispose(); //this prevents the router from being initialized and interfering with the shell app router
-    }
+     constructor(
+       private injector: Injector,
+       private router: Router,
+     ) {
+       router.dispose(); //this prevents the router from being initialized and interfering with the shell app router
+     }
 
-    ngDoBootstrap(appRef: ApplicationRef) {
-      for (const [key, value] of selectorComponentMap) {
-        const customElement = createCustomElement(value, {injector: this.injector});
-        this.webComponentSelectorMap.set(key, customElement);
-      }
-    }
+     ngDoBootstrap(appRef: ApplicationRef) {
+       for (const [key, value] of selectorComponentMap) {
+         const customElement = createCustomElement(value, {
+           injector: this.injector,
+         });
+         this.webComponentSelectorMap.set(key, customElement);
+       }
+     }
 
-    /**
-     * Use componentMapping, selectorComponentMap
-     * @param componentName
-     */
-    public getComponentRef(componentName:string) {
-      return this.webComponentSelectorMap.get(componentName);
-    }
-  }
+     /**
+      * Use componentMapping, selectorComponentMap
+      * @param componentName
+      */
+     public getComponentRef(componentName: string) {
+       return this.webComponentSelectorMap.get(componentName);
+     }
+   }
   return AppModule
 }
 

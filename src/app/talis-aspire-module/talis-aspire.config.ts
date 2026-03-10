@@ -12,7 +12,7 @@ export interface TalisAspireConfig {
 export const TALIS_ASPIRE_CONFIG: TalisAspireConfig = {
   // === You have to set these up! ===
   httpBaseUrl: 'http://lists.library.youruni.ac.uk/', // Your http base URL or the same as baseUrl
-  baseUrl: 'https://yourshortcode.rl.talis.com/', // Your Readinglists tenancy base url with a trailing slash
+  baseUrl: 'https://youruni.rl.talis.com/', // Your Readinglists tenancy base url with a trailing slash
   mmsIdInstitutionCode: 1234, // The last four digits of your MMS_IDs
 
   // === customise the related lists ===
@@ -41,8 +41,6 @@ export function checkMMSIDcontainsInstitutionCode(mmsId: string, institutionCode
 export function extractMmsIds(item: any, institutionCode: number): string[] {
   const mmsIdArr: string[] = [];
 
-  console.log('Extracted', item);
-
   // Check if the nested properties exist before accessing
   if (item?.pnx?.display?.mms) {
     item.pnx.display.mms.forEach((mmsID: string) => {
@@ -54,6 +52,26 @@ export function extractMmsIds(item: any, institutionCode: number): string[] {
   }
 
   return mmsIdArr;
+}
+
+/**
+ * Extract ISBNs from an item's PNX data
+ */
+export function extractIsbns(item: any): string[] {
+  const isbnArr: string[] = [];
+
+  // Check for ISBNs in addata section
+  if (item?.pnx?.addata?.isbn && Array.isArray(item.pnx.addata.isbn)) {
+    item.pnx.addata.isbn.forEach((isbn: string) => {
+      // Clean ISBN: remove hyphens and spaces
+      const cleanIsbn = isbn.replace(/[-\s]/g, '');
+      if (cleanIsbn && cleanIsbn.length >= 10) {
+        isbnArr.push(cleanIsbn);
+      }
+    });
+  }
+
+  return isbnArr;
 }
 
 /**

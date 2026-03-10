@@ -3,5 +3,5 @@ import { TarlRelatedListsComponent } from './tarl-related-lists/tarl-related-lis
 // Define the map
 export const selectorComponentMap = new Map<string, any>([
   ['nde-record-availability-bottom', TarlBookmarkButtonComponent],
-  ['nde-full-display-service-container-after', TarlRelatedListsComponent],
+  ['nde-full-display-details-after', TarlRelatedListsComponent],
 ]);

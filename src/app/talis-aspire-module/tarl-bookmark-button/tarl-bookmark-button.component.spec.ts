@@ -74,15 +74,6 @@ describe('TarlBookmarkButtonComponent', () => {
 
       expect(component.bookmarkableItems.length).toBe(0);
     });
-
-    it('should log a warning', () => {
-      spyOn(console, 'warn');
-      component['hostComponent'] = {};
-
-      component.ngOnInit();
-
-      expect(console.warn).toHaveBeenCalledWith('No searchResult found from hostComponent');
-    });
   });
 
   describe('when MMS ID is found', () => {
@@ -129,17 +120,6 @@ describe('TarlBookmarkButtonComponent', () => {
       expect(url).toContain('rft.au=Test%20Author');
       expect(url).toContain('rft.issn=1234-5678');
     });
-
-    it('should log when using OpenURL params', () => {
-      spyOn(console, 'log');
-      component['hostComponent'] = { searchResult: mockSearchResultWithoutMMS };
-
-      component.ngOnInit();
-
-      expect(console.log).toHaveBeenCalledWith(
-        jasmine.stringMatching(/Using OpenURL params/)
-      );
-    });
   });
 
   describe('when no MMS ID or addata is found', () => {
@@ -149,15 +129,6 @@ describe('TarlBookmarkButtonComponent', () => {
       component.ngOnInit();
 
       expect(component.bookmarkableItems.length).toBe(0);
-    });
-
-    it('should log a warning', () => {
-      spyOn(console, 'warn');
-      component['hostComponent'] = { searchResult: mockSearchResultNoData };
-
-      component.ngOnInit();
-
-      expect(console.warn).toHaveBeenCalledWith('No MMS ID or addata found for bookmarking');
     });
   });
 
