@@ -1,13 +1,13 @@
 .bookmark-button-container {
-  text-align: center;
+  display: block;
   margin: 8px 0;
+  text-align: left;
+}
 
-  button {
-    margin: 4px;
-  }
-
-  .quicklink-button {
-    border: 1px solid;
-    border-radius: 5px;
-  }
+:host ::ng-deep .quicklink-button {
+  border: 1px solid;
+  border-radius: 5px;
+  min-height: 32px;
+  height: 32px;
+  padding: 0 16px;
 }
