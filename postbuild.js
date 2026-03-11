@@ -3,7 +3,7 @@ const path = require('path');
 const archiver = require('archiver');
 require('dotenv').config({ path: './build-settings.env' });
 
-const distPath = path.join(__dirname, 'dist', 'custom-module');
+const distPath = path.join(__dirname, "dist", "talis-aspire-integration");
 const targetPath = path.join(__dirname, 'dist', `${process.env.INST_ID}-${process.env.VIEW_ID}`);
 const zipPath = path.join(__dirname, 'dist', `${process.env.INST_ID}-${process.env.VIEW_ID}.zip`);
 

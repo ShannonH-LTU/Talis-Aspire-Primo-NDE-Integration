@@ -201,7 +201,7 @@ The NDE Customization package is currently available exclusively to Primo custom
 ### Step 1: Download the Project
 1. Navigate to the GitHub repository: [https://github.com/ExLibrisGroup/customModule](https://github.com/ExLibrisGroup/customModule).
 2. Download the ZIP file of the project.
-3. Extract the ZIP file to your desired development folder (e.g., `c:\env\custom-module\`).
+3. Extract the ZIP file to your desired development folder (e.g., `c:\env\talis-aspire-integration\`).
 
 ### Step 2: Install Dependencies
 1. Inside the `customModule` directory, install the necessary npm packages:

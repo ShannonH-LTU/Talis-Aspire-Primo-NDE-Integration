@@ -1,6 +1,6 @@
 {
-  "name": "custom-module",
-  "version": "2.0.0",
+  "name": "talis-aspire-integration",
+  "version": "1.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

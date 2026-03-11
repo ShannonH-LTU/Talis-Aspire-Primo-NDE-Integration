@@ -14,16 +14,18 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have as title 'custom-module'`, () => {
+  it(`should have as title 'talis-aspire-integration'`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.title).toEqual('custom-module');
+    expect(app.title).toEqual('talis-aspire-integration');
   });
 
   it('should render title', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.content span')?.textContent).toContain('custom-module app is running!');
+    expect(compiled.querySelector('.content span')?.textContent).toContain(
+      'talis-aspire-integration app is running!',
+    );
   });
 });

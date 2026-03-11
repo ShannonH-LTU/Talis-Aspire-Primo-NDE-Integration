@@ -13,41 +13,45 @@ sharedMappings.register(
 module.exports = {
   context: path.resolve(__dirname), // Sets the context to the directory where webpack.config.js is
   output: {
-    uniqueName: "customModule",
-    publicPath: 'auto',
+    uniqueName: "talisAspireIntegration",
+    publicPath: "auto",
   },
   optimization: {
     minimize: true,
-    runtimeChunk: false
+    runtimeChunk: false,
   },
   resolve: {
     alias: {
       ...sharedMappings.getAliases(),
-    }
+    },
   },
   experiments: {
-    outputModule: true
+    outputModule: true,
   },
   module: {
     rules: [
       // ... other rules ...
       {
         test: /\.(png|jpe?g|gif|svg)$/i,
-        type: 'asset/resource',
+        type: "asset/resource",
       },
     ],
   },
   plugins: [
     new CopyWebpackPlugin({
       patterns: [
-        { from: 'src/assets', to: 'assets',
-      noErrorOnMissing: true,
-      globOptions: {
-      ignore: [
+        {
+          from: "src/assets",
+          to: "assets",
+          noErrorOnMissing: true,
+          globOptions: {
+            ignore: [
               "**/.gitkeep", // Make sure this matches exactly the files you want to exclude
-              "**/.*" // This pattern excludes all hidden files
-            ] } } // Adjust the paths as needed
-      ]
+              "**/.*", // This pattern excludes all hidden files
+            ],
+          },
+        }, // Adjust the paths as needed
+      ],
     }),
     // DISABLE ngDevMode as it is not needed in a remoteEntry work around for issue: https://github.com/angular-architects/module-federation-plugin/issues/458
     // new webpack.DefinePlugin({
@@ -55,34 +59,33 @@ module.exports = {
     // }),
     // END DISABLE ngDevMode as it is not needed in a remoteEntry
     new ModuleFederationPlugin({
-        library: { type: "module" },
+      library: { type: "module" },
 
-        // For remotes (please adjust)
-        name: "customModule",
-        filename: "remoteEntry.js",
-        exposes: {
-            './custom-module': './src/bootstrap.ts',
-        },
+      // For remotes (please adjust)
+      name: "talisAspireIntegration",
+      filename: "remoteEntry.js",
+      exposes: {
+        "./custom-module": "./src/bootstrap.ts",
+      },
 
-        // For hosts (please adjust)
-        // remotes: {
-        //     "mfe1": "http://localhost:3000/remoteEntry.js",
+      // For hosts (please adjust)
+      // remotes: {
+      //     "mfe1": "http://localhost:3000/remoteEntry.js",
 
-        // },
+      // },
 
       shared: share({
         "@angular/core": { requiredVersion: "auto" },
         "@angular/common": { requiredVersion: "auto" },
         "@angular/router": { requiredVersion: "auto" },
-        "rxjs": { requiredVersion: "auto" },
+        rxjs: { requiredVersion: "auto" },
         "@angular/common/http": { requiredVersion: "auto" },
-        '@angular/platform-browser': { requiredVersion: 'auto' },
-        '@ngx-translate/core': { singleton: true},
-        '@ngrx/store': { singleton: true},
-        ...sharedMappings.getDescriptors()
-      })
-
+        "@angular/platform-browser": { requiredVersion: "auto" },
+        "@ngx-translate/core": { singleton: true },
+        "@ngrx/store": { singleton: true },
+        ...sharedMappings.getDescriptors(),
+      }),
     }),
-    sharedMappings.getPlugin()
+    sharedMappings.getPlugin(),
   ],
 };
