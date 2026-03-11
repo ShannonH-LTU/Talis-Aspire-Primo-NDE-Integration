@@ -1,25 +1,43 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Inject, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { MatDividerModule } from '@angular/material/divider';
-import { TALIS_ASPIRE_CONFIG, extractMmsIds, extractIsbns } from '../talis-aspire.config';
+import {
+  getTalisAspireConfig,
+  TalisAspireConfig,
+  extractMmsIds,
+  extractIsbns,
+} from '../talis-aspire.config';
 
 @Component({
   selector: 'tarl-related-lists',
   standalone: true,
   imports: [CommonModule, MatDividerModule],
   templateUrl: './tarl-related-lists.component.html',
-  styleUrl: './tarl-related-lists.component.scss'
+  styleUrl: './tarl-related-lists.component.scss',
 })
 export class TarlRelatedListsComponent implements OnInit {
   @Input() private hostComponent!: any; // Provided by Primo NDE
 
   listsFound: { [url: string]: string } | null = null;
-  displayLabel = TALIS_ASPIRE_CONFIG.relatedListsDisplayLabel;
+  displayLabel = '';
+  private config!: TalisAspireConfig;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    @Optional() @Inject('MODULE_PARAMETERS') private moduleParameters: any,
+  ) {}
 
   ngOnInit(): void {
+    // Load configuration from MODULE_PARAMETERS
+    try {
+      this.config = getTalisAspireConfig(this.moduleParameters);
+      this.displayLabel = this.config.relatedListsDisplayLabel!;
+    } catch (error) {
+      console.error('Failed to load Talis Aspire configuration:', error);
+      return;
+    }
+
     // Get search result from host component
     const item = this.hostComponent?.searchResult;
     if (!item) {
@@ -28,29 +46,29 @@ export class TarlRelatedListsComponent implements OnInit {
     }
 
     // Extract MMS IDs for this item
-    const mmsIds = extractMmsIds(item, TALIS_ASPIRE_CONFIG.mmsIdInstitutionCode);
+    const mmsIds = extractMmsIds(item, this.config.mmsIdInstitutionCode);
 
     if (mmsIds.length > 0) {
       // Fetch lists for each MMS ID
-      mmsIds.forEach(mmsId => {
+      mmsIds.forEach((mmsId) => {
         this.fetchListsForMmsId(mmsId);
       });
     } else {
       // No MMS ID found, try ISBN as fallback
       const isbns = extractIsbns(item);
-      isbns.forEach(isbn => {
+      isbns.forEach((isbn) => {
         this.fetchListsForISBN(isbn);
       });
     }
   }
 
   private fetchListsForMmsId(mmsId: string): void {
-    const url = `${TALIS_ASPIRE_CONFIG.baseUrl}lcn/${mmsId}/lists.json`;
+    const url = `${this.config.baseUrl}lcn/${mmsId}/lists.json`;
     this.fetchLists(url, `MMS ID: ${mmsId}`);
   }
 
   private fetchListsForISBN(isbn: string): void {
-    const url = `${TALIS_ASPIRE_CONFIG.baseUrl}isbn/${isbn}/lists.json`;
+    const url = `${this.config.baseUrl}isbn/${isbn}/lists.json`;
     this.fetchLists(url, `ISBN: ${isbn}`);
   }
 
@@ -62,10 +80,10 @@ export class TarlRelatedListsComponent implements OnInit {
         const updatedData: { [url: string]: string } = {};
 
         if (data && typeof data === 'object') {
-          Object.keys(data).forEach(oldKey => {
+          Object.keys(data).forEach((oldKey) => {
             const newKey = oldKey.replace(
-              TALIS_ASPIRE_CONFIG.httpBaseUrl,
-              TALIS_ASPIRE_CONFIG.baseUrl
+              this.config.httpBaseUrl,
+              this.config.baseUrl,
             );
             updatedData[newKey] = data[oldKey];
           });
@@ -76,8 +94,11 @@ export class TarlRelatedListsComponent implements OnInit {
       },
       error: (error) => {
         // Silently fail - don't show lists if API call fails
-        console.error(`Talis Aspire API request failed for ${identifier}:`, error);
-      }
+        console.error(
+          `Talis Aspire API request failed for ${identifier}:`,
+          error,
+        );
+      },
     });
   }
 
@@ -85,7 +106,9 @@ export class TarlRelatedListsComponent implements OnInit {
     if (!this.listsFound) {
       return [];
     }
-    return Object.entries(this.listsFound).map(([url, name]) => ({ url, name }));
+    return Object.entries(this.listsFound).map(([url, name]) => ({
+      url,
+      name,
+    }));
   }
 }
-

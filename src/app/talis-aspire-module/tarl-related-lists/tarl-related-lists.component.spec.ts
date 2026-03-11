@@ -11,6 +11,18 @@ describe('TarlRelatedListsComponent', () => {
   let fixture: ComponentFixture<TarlRelatedListsComponent>;
   let httpClient: HttpClient;
 
+  const mockModuleParameters = {
+    talisAspire: {
+      baseUrl: 'https://test.rl.talis.com/',
+      httpBaseUrl: 'http://test.library.ac.uk/',
+      mmsIdInstitutionCode: 1234,
+      relatedListsDisplayLabel: 'Cited on reading lists:',
+      displayBookmarkThisButton: true,
+      bookmarkThisTitleAttribute: 'bookmark this item to reading lists',
+      bookmarkThisButtonText: 'Send To Reading Lists',
+    },
+  };
+
   const mockMmsItem = {
     pnx: {
       display: {
@@ -28,15 +40,18 @@ describe('TarlRelatedListsComponent', () => {
   };
 
   const mockApiResponse = {
-    'http://lists.library.qmul.ac.uk/lists/ABC123': 'Introduction to Computer Science',
-    'http://lists.library.qmul.ac.uk/lists/DEF456': 'Advanced Programming'
+    'http://test.library.ac.uk/lists/ABC123':
+      'Introduction to Computer Science',
+    'http://test.library.ac.uk/lists/DEF456': 'Advanced Programming',
   };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TarlRelatedListsComponent, HttpClientTestingModule]
-    })
-    .compileComponents();
+      imports: [TarlRelatedListsComponent, HttpClientTestingModule],
+      providers: [
+        { provide: 'MODULE_PARAMETERS', useValue: mockModuleParameters },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TarlRelatedListsComponent);
     component = fixture.componentInstance;
@@ -47,8 +62,10 @@ describe('TarlRelatedListsComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize with config display label', () => {
-    expect(component.displayLabel).toBe(config.TALIS_ASPIRE_CONFIG.relatedListsDisplayLabel);
+  it('should initialize with config display label after ngOnInit', () => {
+    component['hostComponent'] = { searchResult: mockMmsItem };
+    component.ngOnInit();
+    expect(component.displayLabel).toBe('Cited on reading lists:');
   });
 
   describe('ngOnInit', () => {
@@ -77,7 +94,7 @@ describe('TarlRelatedListsComponent', () => {
 
       component.ngOnInit();
 
-      expect(config.extractMmsIds).toHaveBeenCalledWith(mockMmsItem, config.TALIS_ASPIRE_CONFIG.mmsIdInstitutionCode);
+      expect(config.extractMmsIds).toHaveBeenCalledWith(mockMmsItem, 1234);
       expect(component['fetchListsForMmsId']).toHaveBeenCalledWith('991234567891234');
     });
 
@@ -110,31 +127,40 @@ describe('TarlRelatedListsComponent', () => {
 
   describe('fetchListsForMmsId', () => {
     it('should call fetchLists with correct MMS ID URL', () => {
+      component['hostComponent'] = { searchResult: mockMmsItem };
+      component.ngOnInit(); // Initialize config
       spyOn<any>(component, 'fetchLists');
 
       component['fetchListsForMmsId']('991234567891234');
 
       expect(component['fetchLists']).toHaveBeenCalledWith(
-        `${config.TALIS_ASPIRE_CONFIG.baseUrl}lcn/991234567891234/lists.json`,
-        'MMS ID: 991234567891234'
+        'https://test.rl.talis.com/lcn/991234567891234/lists.json',
+        'MMS ID: 991234567891234',
       );
     });
   });
 
   describe('fetchListsForISBN', () => {
     it('should call fetchLists with correct ISBN URL', () => {
+      component['hostComponent'] = { searchResult: mockIsbnItem };
+      component.ngOnInit(); // Initialize config
       spyOn<any>(component, 'fetchLists');
 
       component['fetchListsForISBN']('9780123456789');
 
       expect(component['fetchLists']).toHaveBeenCalledWith(
-        `${config.TALIS_ASPIRE_CONFIG.baseUrl}isbn/9780123456789/lists.json`,
-        'ISBN: 9780123456789'
+        'https://test.rl.talis.com/isbn/9780123456789/lists.json',
+        'ISBN: 9780123456789',
       );
     });
   });
 
   describe('fetchLists', () => {
+    beforeEach(() => {
+      component['hostComponent'] = { searchResult: mockMmsItem };
+      component.ngOnInit(); // Initialize config
+    });
+
     it('should fetch and store lists with HTTPS URLs', (done) => {
       spyOn(httpClient, 'jsonp').and.returnValue(of(mockApiResponse));
 
@@ -144,8 +170,9 @@ describe('TarlRelatedListsComponent', () => {
       setTimeout(() => {
         expect(httpClient.jsonp).toHaveBeenCalledWith('https://example.com/lists.json', 'cb');
         expect(component.listsFound).toEqual({
-          'https://qmul.rl.talis.com/lists/ABC123': 'Introduction to Computer Science',
-          'https://qmul.rl.talis.com/lists/DEF456': 'Advanced Programming'
+          'https://test.rl.talis.com/lists/ABC123':
+            'Introduction to Computer Science',
+          'https://test.rl.talis.com/lists/DEF456': 'Advanced Programming',
         });
         done();
       }, 10);
@@ -153,10 +180,10 @@ describe('TarlRelatedListsComponent', () => {
 
     it('should merge lists from multiple API calls', (done) => {
       const firstResponse = {
-        'http://lists.library.qmul.ac.uk/lists/ABC123': 'First List'
+        'http://test.library.ac.uk/lists/ABC123': 'First List',
       };
       const secondResponse = {
-        'http://lists.library.qmul.ac.uk/lists/DEF456': 'Second List'
+        'http://test.library.ac.uk/lists/DEF456': 'Second List',
       };
 
       spyOn(httpClient, 'jsonp').and.returnValues(of(firstResponse), of(secondResponse));
@@ -168,8 +195,8 @@ describe('TarlRelatedListsComponent', () => {
 
         setTimeout(() => {
           expect(component.listsFound).toEqual({
-            'https://qmul.rl.talis.com/lists/ABC123': 'First List',
-            'https://qmul.rl.talis.com/lists/DEF456': 'Second List'
+            'https://test.rl.talis.com/lists/ABC123': 'First List',
+            'https://test.rl.talis.com/lists/DEF456': 'Second List',
           });
           done();
         }, 10);

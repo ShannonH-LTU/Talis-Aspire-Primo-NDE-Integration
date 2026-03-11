@@ -1,9 +1,90 @@
 # Talis Aspire Primo NDE Integration
 
-We are working on building an integration with Primo NDE.
+This add-on integrates Talis Aspire Reading Lists with Ex Libris Primo NDE (New Discovery Experience), providing:
 
-We will update this README with Talis Aspire specific instructions when it is ready for use.
-i.e. This is not released or ready for use yet!
+1. **"Send To Reading Lists" Button** - Allows users to bookmark catalog items directly to their reading lists
+2. **"Cited on reading lists" Section** - Displays which reading lists cite the current catalog item
+
+## Configuration
+
+This add-on is configured via Alma's Add-On Configuration. Upload a JSON configuration file with the following structure.
+
+See [talis-aspire-config-example.json](talis-aspire-config-example.json) for a complete configuration template.
+
+**Note:** The example file contains an `_instructions` field at the top for guidance. Remove this field before uploading to Alma.
+
+### Configuration Fields
+
+#### Required Fields
+
+- **`baseUrl`** (string, **REQUIRED**): Your Talis Aspire tenancy base URL with trailing slash (HTTPS)
+  - Example: `"https://youruni.rl.talis.com/"`
+  
+- **`mmsIdInstitutionCode`** (number, **REQUIRED**): The last four digits of your institution's MMS IDs
+  - Example: `1234` for MMS IDs like `9912345678901234`
+
+#### Optional Fields
+
+The following fields are optional. If not provided, sensible defaults will be used.
+
+- **`httpBaseUrl`** (string, optional): Your HTTP base URL for API response URL conversion
+  - Used to identify and replace insecure HTTP URLs returned by the API with secure HTTPS URLs
+  - **If not provided, automatically derived from `baseUrl` by replacing `https://` with `http://`**
+  - Only set this if your HTTP and HTTPS URLs use different hostnames
+  - Example: `"http://lists.library.youruni.ac.uk/"` when baseUrl is `"https://youruni.rl.talis.com/"`
+
+- **`relatedListsDisplayLabel`** (string, optional): Text label for the related lists section
+  - Default: `"Cited on reading lists:"`
+
+- **`displayBookmarkThisButton`** (boolean, optional): Whether to show the bookmark button
+  - Default: `true`
+  - Set to `false` to disable the bookmark functionality
+
+- **`bookmarkThisTitleAttribute`** (string, optional): Tooltip text for the bookmark button
+  - Default: `"bookmark this item to reading lists"`
+
+- **`bookmarkThisButtonText`** (string, optional): Button label text
+  - Default: `"Send To Reading Lists"`
+
+### Minimal Configuration Example
+
+For most institutions, you only need to provide the two required fields:
+
+```json
+{
+  "talisAspire": {
+    "baseUrl": "https://youruni.rl.talis.com/",
+    "mmsIdInstitutionCode": 1234
+  }
+}
+```
+
+All optional fields will use their default values, and `httpBaseUrl` will be automatically generated.
+
+## Features
+
+### Bookmark Button
+
+- Appears below item availability information in full record display
+- Supports MMS ID-based bookmarking (primary method)
+- Falls back to OpenURL parameters when MMS ID is not available
+- Configurable button text and tooltip
+
+### Related Lists Display
+
+- Shows reading lists that cite the current catalog item
+- Uses MMS ID lookup (primary method)
+- Falls back to ISBN lookup when MMS ID is not available
+- Clean, simple bulleted list design
+- Links open in new tabs
+
+## Technical Details
+
+- Built as an Angular standalone component add-on for Primo NDE
+- Uses JSONP for cross-origin API requests to Talis Aspire
+- Integrates via Primo NDE component hooks:
+  - `nde-record-availability-bottom` - Bookmark button placement
+  - `nde-full-display-service-container-after` - Related lists placement
 
 ---
 

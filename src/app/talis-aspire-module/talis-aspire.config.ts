@@ -1,33 +1,80 @@
-// Talis Aspire Configuration
+/**
+ * Talis Aspire Configuration Interface
+ *
+ * These values should be provided via MODULE_PARAMETERS injection token
+ * by the institution's add-on configuration JSON in Alma.
+ */
 export interface TalisAspireConfig {
   httpBaseUrl: string;
   baseUrl: string;
   mmsIdInstitutionCode: number;
-  relatedListsDisplayLabel: string;
-  displayBookmarkThisButton: boolean;
-  bookmarkThisTitleAttribute: string;
-  bookmarkThisButtonText: string;
+  relatedListsDisplayLabel?: string;
+  displayBookmarkThisButton?: boolean;
+  bookmarkThisTitleAttribute?: string;
+  bookmarkThisButtonText?: string;
 }
 
-export const TALIS_ASPIRE_CONFIG: TalisAspireConfig = {
-  // === You have to set these up! ===
-  httpBaseUrl: 'http://lists.library.youruni.ac.uk/', // Your http base URL or the same as baseUrl
-  baseUrl: 'https://youruni.rl.talis.com/', // Your Readinglists tenancy base url with a trailing slash
-  mmsIdInstitutionCode: 1234, // The last four digits of your MMS_IDs
-
-  // === customise the related lists ===
-  relatedListsDisplayLabel: 'Cited on reading lists:', // Text to display to users
-
-  // === customise the bookmark this button ===
-  displayBookmarkThisButton: true, // set to false to hide the button
-  bookmarkThisTitleAttribute: 'bookmark this item to reading lists', // tooltip for the bookmark this button
-  bookmarkThisButtonText: 'Send To Reading Lists', // Clickable text for the bookmark this button
+/**
+ * Default configuration values
+ * Used when values are not provided in MODULE_PARAMETERS
+ */
+export const TALIS_ASPIRE_DEFAULTS = {
+  relatedListsDisplayLabel: 'Cited on reading lists:',
+  displayBookmarkThisButton: true,
+  bookmarkThisTitleAttribute: 'bookmark this item to reading lists',
+  bookmarkThisButtonText: 'Send To Reading Lists',
 };
+
+/**
+ * Get configuration with defaults applied
+ */
+export function getTalisAspireConfig(moduleParameters: any): TalisAspireConfig {
+  if (!moduleParameters?.talisAspire) {
+    console.error(
+      'Talis Aspire configuration not found in MODULE_PARAMETERS. Please configure the add-on in Alma.',
+    );
+    throw new Error('Talis Aspire configuration missing');
+  }
+
+  const config = moduleParameters.talisAspire;
+
+  // Validate required fields
+  if (!config.baseUrl) {
+    throw new Error('Talis Aspire baseUrl is required in configuration');
+  }
+  if (!config.mmsIdInstitutionCode) {
+    throw new Error(
+      'Talis Aspire mmsIdInstitutionCode is required in configuration',
+    );
+  }
+
+  // Apply defaults for optional fields
+  return {
+    httpBaseUrl: config.httpBaseUrl || config.baseUrl.replace('https://', 'http://'), // Convert HTTPS to HTTP if not provided
+    baseUrl: config.baseUrl,
+    mmsIdInstitutionCode: config.mmsIdInstitutionCode,
+    relatedListsDisplayLabel:
+      config.relatedListsDisplayLabel ??
+      TALIS_ASPIRE_DEFAULTS.relatedListsDisplayLabel,
+    displayBookmarkThisButton:
+      config.displayBookmarkThisButton ??
+      TALIS_ASPIRE_DEFAULTS.displayBookmarkThisButton,
+    bookmarkThisTitleAttribute:
+      config.bookmarkThisTitleAttribute ??
+      TALIS_ASPIRE_DEFAULTS.bookmarkThisTitleAttribute,
+    bookmarkThisButtonText:
+      config.bookmarkThisButtonText ??
+      TALIS_ASPIRE_DEFAULTS.bookmarkThisButtonText,
+  };
+}
 
 /**
  * Helper function to check if an MMS ID matches the institution code
  */
-export function checkMMSIDcontainsInstitutionCode(mmsId: string, institutionCode: number): string | undefined {
+export function checkMMSIDcontainsInstitutionCode(
+  mmsId: string,
+  institutionCode: number,
+): string | undefined {
   const mmsidCheck = new RegExp('^99[0-9]*' + institutionCode + '$');
   if (mmsidCheck.test(mmsId)) {
     return mmsId;
@@ -87,7 +134,11 @@ export function buildOpenUrlParams(addata: any): string {
 
   // Helper to add first value from array
   const addParam = (key: string, addataKey: string) => {
-    if (addata[addataKey] && Array.isArray(addata[addataKey]) && addata[addataKey][0]) {
+    if (
+      addata[addataKey] &&
+      Array.isArray(addata[addataKey]) &&
+      addata[addataKey][0]
+    ) {
       params[key] = addata[addataKey][0];
     }
   };
@@ -112,7 +163,9 @@ export function buildOpenUrlParams(addata: any): string {
 
   // Build query string
   return Object.entries(params)
-    .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(value)}`,
+    )
     .join('&');
 }
-

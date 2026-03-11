@@ -1,23 +1,34 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TarlBookmarkButtonComponent } from './tarl-bookmark-button.component';
-import { TALIS_ASPIRE_CONFIG } from '../talis-aspire.config';
 
 describe('TarlBookmarkButtonComponent', () => {
   let component: TarlBookmarkButtonComponent;
   let fixture: ComponentFixture<TarlBookmarkButtonComponent>;
 
+  const mockModuleParameters = {
+    talisAspire: {
+      baseUrl: 'https://test.rl.talis.com/',
+      httpBaseUrl: 'http://test.library.ac.uk/',
+      mmsIdInstitutionCode: 1234,
+      relatedListsDisplayLabel: 'Cited on reading lists:',
+      displayBookmarkThisButton: true,
+      bookmarkThisTitleAttribute: 'bookmark this item to reading lists',
+      bookmarkThisButtonText: 'Send To Reading Lists',
+    },
+  };
+
   const mockSearchResultWithMMS = {
     pnx: {
       display: {
-        mms: ['9912345678901234'] // Matches default institution code 1234
+        mms: ['9912345678901234'], // Matches institution code 1234
       },
       addata: {
         atitle: ['Test Article'],
         jtitle: ['Test Journal'],
         au: ['Test Author'],
-        issn: ['1234-5678']
-      }
-    }
+        issn: ['1234-5678'],
+      },
+    },
   };
 
   const mockSearchResultWithoutMMS = {
@@ -42,9 +53,11 @@ describe('TarlBookmarkButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TarlBookmarkButtonComponent]
-    })
-    .compileComponents();
+      imports: [TarlBookmarkButtonComponent],
+      providers: [
+        { provide: 'MODULE_PARAMETERS', useValue: mockModuleParameters },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TarlBookmarkButtonComponent);
     component = fixture.componentInstance;
@@ -56,13 +69,24 @@ describe('TarlBookmarkButtonComponent', () => {
 
   describe('when displayButton is false', () => {
     it('should not create bookmarkable items', () => {
-      TALIS_ASPIRE_CONFIG.displayBookmarkThisButton = false;
+      const disabledParams = {
+        talisAspire: {
+          ...mockModuleParameters.talisAspire,
+          displayBookmarkThisButton: false,
+        },
+      };
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [TarlBookmarkButtonComponent],
+        providers: [{ provide: 'MODULE_PARAMETERS', useValue: disabledParams }],
+      });
+      fixture = TestBed.createComponent(TarlBookmarkButtonComponent);
+      component = fixture.componentInstance;
       component['hostComponent'] = { searchResult: mockSearchResultWithMMS };
 
       component.ngOnInit();
 
       expect(component.bookmarkableItems.length).toBe(0);
-      TALIS_ASPIRE_CONFIG.displayBookmarkThisButton = true; // Reset
     });
   });
 
@@ -92,8 +116,12 @@ describe('TarlBookmarkButtonComponent', () => {
 
       component.ngOnInit();
 
-      expect(component.bookmarkableItems[0].actionText).toBe(TALIS_ASPIRE_CONFIG.bookmarkThisButtonText);
-      expect(component.bookmarkableItems[0].title).toBe(TALIS_ASPIRE_CONFIG.bookmarkThisTitleAttribute);
+      expect(component.bookmarkableItems[0].actionText).toBe(
+        'Send To Reading Lists',
+      );
+      expect(component.bookmarkableItems[0].title).toBe(
+        'bookmark this item to reading lists',
+      );
     });
   });
 
@@ -151,14 +179,25 @@ describe('TarlBookmarkButtonComponent', () => {
 
   describe('button rendering', () => {
     it('should not render buttons when displayButton is false', () => {
-      TALIS_ASPIRE_CONFIG.displayBookmarkThisButton = false;
+      const disabledParams = {
+        talisAspire: {
+          ...mockModuleParameters.talisAspire,
+          displayBookmarkThisButton: false,
+        },
+      };
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [TarlBookmarkButtonComponent],
+        providers: [{ provide: 'MODULE_PARAMETERS', useValue: disabledParams }],
+      });
+      fixture = TestBed.createComponent(TarlBookmarkButtonComponent);
+      component = fixture.componentInstance;
       component['hostComponent'] = { searchResult: mockSearchResultWithMMS };
 
       fixture.detectChanges();
 
       const buttons = fixture.nativeElement.querySelectorAll('button');
       expect(buttons.length).toBe(0);
-      TALIS_ASPIRE_CONFIG.displayBookmarkThisButton = true; // Reset
     });
 
     it('should render button when bookmarkable items exist', () => {
@@ -176,7 +215,7 @@ describe('TarlBookmarkButtonComponent', () => {
       fixture.detectChanges();
 
       const button = fixture.nativeElement.querySelector('button');
-      expect(button.textContent.trim()).toBe(TALIS_ASPIRE_CONFIG.bookmarkThisButtonText);
+      expect(button.textContent.trim()).toBe('Send To Reading Lists');
     });
 
     it('should render multiple buttons for multiple MMS IDs', () => {

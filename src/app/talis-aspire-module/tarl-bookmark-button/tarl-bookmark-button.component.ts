@@ -1,7 +1,12 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, Inject, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatButtonModule } from '@angular/material/button';
-import { TALIS_ASPIRE_CONFIG, extractMmsIds, buildOpenUrlParams } from '../talis-aspire.config';
+import {
+  getTalisAspireConfig,
+  TalisAspireConfig,
+  extractMmsIds,
+  buildOpenUrlParams,
+} from '../talis-aspire.config';
 
 interface BookmarkableItem {
   url: string;
@@ -20,9 +25,23 @@ export class TarlBookmarkButtonComponent implements OnInit {
   @Input() private hostComponent!: any; // Provided by Primo NDE
 
   bookmarkableItems: BookmarkableItem[] = [];
-  displayButton = TALIS_ASPIRE_CONFIG.displayBookmarkThisButton;
+  displayButton = true;
+  private config!: TalisAspireConfig;
+
+  constructor(
+    @Optional() @Inject('MODULE_PARAMETERS') private moduleParameters: any,
+  ) {}
 
   ngOnInit(): void {
+    // Load configuration from MODULE_PARAMETERS
+    try {
+      this.config = getTalisAspireConfig(this.moduleParameters);
+      this.displayButton = this.config.displayBookmarkThisButton ?? true;
+    } catch (error) {
+      console.error('Failed to load Talis Aspire configuration:', error);
+      return;
+    }
+
     if (!this.displayButton) {
       return;
     }
@@ -34,17 +53,14 @@ export class TarlBookmarkButtonComponent implements OnInit {
     }
 
     // Extract MMS IDs for this item
-    const mmsIds = extractMmsIds(
-      item,
-      TALIS_ASPIRE_CONFIG.mmsIdInstitutionCode,
-    );
+    const mmsIds = extractMmsIds(item, this.config.mmsIdInstitutionCode);
 
     if (mmsIds.length > 0) {
       // Create bookmarkable items for each MMS ID
       this.bookmarkableItems = mmsIds.map((mmsId) => ({
-        url: `${TALIS_ASPIRE_CONFIG.baseUrl}ui/forms/bookmarklet.html?bibid=${mmsId}`,
-        title: TALIS_ASPIRE_CONFIG.bookmarkThisTitleAttribute,
-        actionText: TALIS_ASPIRE_CONFIG.bookmarkThisButtonText,
+        url: `${this.config.baseUrl}ui/forms/bookmarklet.html?bibid=${mmsId}`,
+        title: this.config.bookmarkThisTitleAttribute!,
+        actionText: this.config.bookmarkThisButtonText!,
       }));
     } else {
       // No MMS ID found, try to build OpenURL from addata
@@ -54,9 +70,9 @@ export class TarlBookmarkButtonComponent implements OnInit {
         if (openUrlParams) {
           this.bookmarkableItems = [
             {
-              url: `${TALIS_ASPIRE_CONFIG.baseUrl}ui/forms/bookmarklet.html?${openUrlParams}`,
-              title: TALIS_ASPIRE_CONFIG.bookmarkThisTitleAttribute,
-              actionText: TALIS_ASPIRE_CONFIG.bookmarkThisButtonText,
+              url: `${this.config.baseUrl}ui/forms/bookmarklet.html?${openUrlParams}`,
+              title: this.config.bookmarkThisTitleAttribute!,
+              actionText: this.config.bookmarkThisButtonText!,
             },
           ];
         }
@@ -68,4 +84,3 @@ export class TarlBookmarkButtonComponent implements OnInit {
     window.location.href = url;
   }
 }
-
