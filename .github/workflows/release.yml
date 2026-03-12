@@ -1,0 +1,53 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build project
+        run: npm run build
+
+      - name: Get addon name from env
+        id: addon-name
+        run: |
+          ADDON_NAME=$(grep '^ADDON_NAME=' build-settings.env | cut -d '=' -f2)
+          echo "addon_name=${ADDON_NAME}" >> $GITHUB_OUTPUT
+          echo "Building addon: ${ADDON_NAME}"
+
+      - name: Create/Update Latest Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Latest Build
+          body: |
+            Latest build from main branch
+
+            Built from commit: ${{ github.sha }}
+            Date: ${{ github.event.head_commit.timestamp }}
+          files: dist/${{ steps.addon-name.outputs.addon_name }}.zip
+          prerelease: false
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
