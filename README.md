@@ -22,7 +22,21 @@ This add-on integrates Talis Aspire Reading Lists with Ex Libris Primo NDE (New 
 - Clean, simple bulleted list design
 - Links open in new tabs
 
-## Configuration
+## Customer Configuration Steps
+
+Library system managers can easily add, configure, and manage these add-ons through Alma. You will need to know:
+
+- **Add-on Name** – `TalisAspireIntegration`
+- **Add-on URL** – `https://github.com/talis/Talis-Aspire-Primo-NDE-Integration/releases/download/latest/TalisAspireIntegration.zip` This URL will always point to the latest released version of this plugin.
+- **Configuration Parameters** – JSON-based config parameters to be referenced at runtime by the add-on. The available paramters are discussed below.
+
+In Primo you will configure an addon: the screen looks like this
+
+![Add-on Overview](./readme-files/addon-overview.png)
+
+[Instructions for managing Add-Ons in the NDE User Interface](https://knowledge.exlibrisgroup.com/Primo/Product_Documentation/020Primo_VE/Primo_VE_(English)/120Other_Configurations/Managing_Add-Ons_for_the_NDE_UI)
+
+## Configuration Parameters
 
 This add-on is configured via Alma's Add-On Configuration. Upload a JSON configuration file with the following structure.
 
@@ -77,21 +91,6 @@ For most institutions, you only need to provide the two required fields:
 ```
 
 All optional fields will use their default values, and `httpBaseUrl` will be automatically generated.
-
-## Customer Configuration Steps
-
-Library staff can easily add, configure, and manage these add-ons through Alma. You will need to know:
-
-- **Add-on Name** – `TalisAspireIntegration`
-- **Add-on URL** – The location where the add-on is hosted (static folder to load the add-on at runtime). We need to ADD a permanent URL that will always host the current Add On Bundle.
-- **Configuration Parameters** – JSON-based config parameters to be referenced at runtime by the add-on. These are discussed above.
-
-In Primo you will configure an addon: the screen looks like this
-
-![Add-on Overview](./readme-files/addon-overview.png)
-
-[Instructions for managing Add-Ons in the NDE User Interface](https://knowledge.exlibrisgroup.com/Primo/Product_Documentation/020Primo_VE/Primo_VE_(English)/120Other_Configurations/Managing_Add-Ons_for_the_NDE_UI)
-
 
 ## Local Development Configuration
 

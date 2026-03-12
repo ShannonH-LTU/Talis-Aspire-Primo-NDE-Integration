@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 jobs:
@@ -36,18 +38,37 @@ jobs:
           echo "addon_name=${ADDON_NAME}" >> $GITHUB_OUTPUT
           echo "Building addon: ${ADDON_NAME}"
 
-      - name: Create/Update Latest Release
+      - name: Determine release type
+        id: release-type
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+            echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
+            echo "is_tag=true" >> $GITHUB_OUTPUT
+            echo "release_name=Release ${TAG_NAME}" >> $GITHUB_OUTPUT
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          else
+            echo "tag_name=latest" >> $GITHUB_OUTPUT
+            echo "is_tag=false" >> $GITHUB_OUTPUT
+            echo "release_name=Latest Build" >> $GITHUB_OUTPUT
+            echo "prerelease=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create/Update Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: latest
-          name: Latest Build
+          tag_name: ${{ steps.release-type.outputs.tag_name }}
+          name: ${{ steps.release-type.outputs.release_name }}
           body: |
-            Latest build from main branch
+            ${{ steps.release-type.outputs.is_tag == 'true' && format('Version {0}', steps.release-type.outputs.tag_name) || 'Latest build from main branch' }}
 
             Built from commit: ${{ github.sha }}
-            Date: ${{ github.event.head_commit.timestamp }}
+            Build date: ${{ github.event.head_commit.timestamp }}
+
+            **Download:**
+            [TalisAspireIntegration.zip](https://github.com/${{ github.repository }}/releases/download/${{ steps.release-type.outputs.tag_name }}/${{ steps.addon-name.outputs.addon_name }}.zip)
           files: dist/${{ steps.addon-name.outputs.addon_name }}.zip
-          prerelease: false
-          make_latest: true
+          prerelease: ${{ steps.release-type.outputs.prerelease }}
+          make_latest: ${{ steps.release-type.outputs.is_tag == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
