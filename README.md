@@ -26,9 +26,9 @@ This add-on integrates Talis Aspire Reading Lists with Ex Libris Primo NDE (New 
 
 This add-on is configured via Alma's Add-On Configuration. Upload a JSON configuration file with the following structure.
 
-See [talis-aspire-config-example.json](talis-aspire-config-example.json) for a complete configuration template.
+See [talis-aspire-config-example.json](talis-aspire-config-example.json) in this repo for a complete configuration template.
 
-**Note:** The example file contains an `_instructions` field at the top for guidance. Remove this field before uploading to Alma.
+**Note:** The example file contains an `_instructions` field at the top for guidance. Remove this field before uploading to Primo.
 
 ### Configuration Fields
 
