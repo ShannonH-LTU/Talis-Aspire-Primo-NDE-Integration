@@ -1,5 +1,8 @@
 # Talis Aspire Primo NDE Integration
 
+[![Latest Release](https://img.shields.io/github/v/release/talis/Talis-Aspire-Primo-NDE-Integration?include_prereleases&label=Latest%20Release)](https://github.com/talis/Talis-Aspire-Primo-NDE-Integration/releases/latest)
+[![Download](https://img.shields.io/github/downloads/talis/Talis-Aspire-Primo-NDE-Integration/latest/total?label=Downloads)](https://github.com/talis/Talis-Aspire-Primo-NDE-Integration/releases/download/latest/TalisAspireIntegration.zip)
+
 This add-on integrates Talis Aspire Reading Lists with Ex Libris Primo NDE (New Discovery Experience), providing:
 
 1. **"Send To Reading Lists" Button** - Allows users to bookmark catalog items directly to their reading lists
