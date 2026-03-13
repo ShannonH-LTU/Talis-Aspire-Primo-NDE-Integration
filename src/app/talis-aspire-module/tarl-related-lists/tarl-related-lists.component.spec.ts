@@ -88,39 +88,48 @@ describe('TarlRelatedListsComponent', () => {
     });
 
     it('should fetch lists using MMS ID when available', () => {
-      spyOn(config, 'extractMmsIds').and.returnValue(['991234567891234']);
       spyOn<any>(component, 'fetchListsForMmsId');
       component['hostComponent'] = { searchResult: mockMmsItem };
 
       component.ngOnInit();
 
-      expect(config.extractMmsIds).toHaveBeenCalledWith(mockMmsItem, 1234);
-      expect(component['fetchListsForMmsId']).toHaveBeenCalledWith('991234567891234');
+      // extractMmsIds should find the MMS ID in mockMmsItem
+      expect(component['fetchListsForMmsId']).toHaveBeenCalledWith(
+        '991234567891234',
+      );
     });
 
     it('should fetch lists for multiple MMS IDs', () => {
-      spyOn(config, 'extractMmsIds').and.returnValue(['991234567891234', '991234567895678']);
+      const multiMmsItem = {
+        pnx: {
+          display: {
+            mms: ['991234567891234', '999876543211234'],
+          },
+        },
+      };
       spyOn<any>(component, 'fetchListsForMmsId');
-      component['hostComponent'] = { searchResult: mockMmsItem };
+      component['hostComponent'] = { searchResult: multiMmsItem };
 
       component.ngOnInit();
 
       expect(component['fetchListsForMmsId']).toHaveBeenCalledTimes(2);
       expect(component['fetchListsForMmsId']).toHaveBeenCalledWith('991234567891234');
-      expect(component['fetchListsForMmsId']).toHaveBeenCalledWith('991234567895678');
+      expect(component['fetchListsForMmsId']).toHaveBeenCalledWith(
+        '999876543211234',
+      );
     });
 
     it('should fall back to ISBN when no MMS ID available', () => {
-      spyOn(config, 'extractMmsIds').and.returnValue([]);
-      spyOn(config, 'extractIsbns').and.returnValue(['9780123456789', '0123456789']);
       spyOn<any>(component, 'fetchListsForISBN');
       component['hostComponent'] = { searchResult: mockIsbnItem };
 
       component.ngOnInit();
 
-      expect(config.extractIsbns).toHaveBeenCalledWith(mockIsbnItem);
+      // extractIsbns should find and clean the ISBNs in mockIsbnItem
       expect(component['fetchListsForISBN']).toHaveBeenCalledTimes(2);
-      expect(component['fetchListsForISBN']).toHaveBeenCalledWith('9780123456789');
+      expect(component['fetchListsForISBN']).toHaveBeenCalledWith(
+        '9780123456789',
+      ); // cleaned from '978-0-123456-78-9'
       expect(component['fetchListsForISBN']).toHaveBeenCalledWith('0123456789');
     });
   });
