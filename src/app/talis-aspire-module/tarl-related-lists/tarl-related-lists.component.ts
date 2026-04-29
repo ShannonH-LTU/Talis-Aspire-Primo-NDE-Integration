@@ -1,31 +1,49 @@
-import { Component, Input, OnInit, Inject, Optional } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import {
-  getTalisAspireConfig,
-  TalisAspireConfig,
-  extractMmsIds,
-  extractIsbns,
-} from '../talis-aspire.config';
+import { getTalisAspireConfig, TalisAspireConfig, extractMmsIds, extractIsbns } from '../talis-aspire.config';
+import { Store, createFeatureSelector, createSelector } from '@ngrx/store';
+import { distinctUntilChanged, filter, Subject, takeUntil } from 'rxjs';
+
+const selectFullDisplayState = createFeatureSelector<any>('full-display');
+const selectSelectedRecordId = createSelector(
+  selectFullDisplayState,
+  (state: any) => state?.selectedRecordId
+);
+
+const selectSearchState = createFeatureSelector<any>('Search');
+const selectSearchEntities = createSelector(
+  selectSearchState,
+  (state: any) => state?.entities
+);
+
+// select the entity using the current record ID
+const selectCurrentFullDisplayRecord = createSelector(
+  selectSelectedRecordId,
+  selectSearchEntities,
+  (recordId: string, entities: any) => {
+    if (!recordId || !entities) return null;
+    return entities[recordId];
+  }
+);
 
 @Component({
   selector: 'tarl-related-lists',
   standalone: true,
-  imports: [CommonModule, MatDividerModule, MatIconModule, MatButtonModule],
+  imports: [CommonModule, MatIconModule],
   templateUrl: './tarl-related-lists.component.html',
   styleUrl: './tarl-related-lists.component.scss',
 })
-export class TarlRelatedListsComponent implements OnInit {
-  @Input() private hostComponent!: any; // Provided by Primo NDE
-
+export class TarlRelatedListsComponent implements OnInit, OnDestroy {
   listsFound: { [url: string]: string } | null = null;
   displayLabel = '';
-  private config!: TalisAspireConfig;
+  
+  private config!: TalisAspireConfig;  
+  private destroy$ = new Subject<void>();
 
   constructor(
+    private store: Store<any>,
     private http: HttpClient,
     @Optional() @Inject('MODULE_PARAMETERS') private moduleParameters: any,
   ) {}
@@ -40,15 +58,28 @@ export class TarlRelatedListsComponent implements OnInit {
       return;
     }
 
-    // Get search result from host component
-    const item = this.hostComponent?.searchResult;
-    if (!item) {
-      console.warn('No searchResult found from hostComponent');
-      return;
-    }
+    this.store.select(selectCurrentFullDisplayRecord)
+      .pipe(
+        filter(Boolean),
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      )
+      .subscribe((entity: any) => {
+        this.updateReadingListsForEntity(entity);
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private updateReadingListsForEntity(entity: any): void {
+    // clear previous results
+    this.listsFound = null;
 
     // Extract MMS IDs for this item
-    const mmsIds = extractMmsIds(item, this.config.mmsIdInstitutionCode);
+    const mmsIds = extractMmsIds(entity, this.config.mmsIdInstitutionCode);
 
     if (mmsIds.length > 0) {
       // Fetch lists for each MMS ID
@@ -57,7 +88,7 @@ export class TarlRelatedListsComponent implements OnInit {
       });
     } else {
       // No MMS ID found, try ISBN as fallback
-      const isbns = extractIsbns(item);
+      const isbns = extractIsbns(entity);
       isbns.forEach((isbn) => {
         this.fetchListsForISBN(isbn);
       });
