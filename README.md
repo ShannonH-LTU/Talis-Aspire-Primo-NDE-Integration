@@ -30,8 +30,9 @@ This add-on integrates Talis Aspire Reading Lists with Ex Libris Primo NDE (New 
 Library system managers can easily add, configure, and manage these add-ons through Alma. You will need to know:
 
 - **Add-on Name** – `TalisAspireIntegration`
-- **Add-on URL** – `https://github.com/talis/Talis-Aspire-Primo-NDE-Integration/releases/download/latest/TalisAspireIntegration.zip` This URL will always point to the latest released version of this plugin.
-- **Configuration Parameters** – JSON-based config parameters to be referenced at runtime by the add-on. The available paramters are discussed below.
+- **Add-on URL** – `https://your-domain.com/path/to/TalisAspireIntegration` \
+(Download, extract, and host `https://github.com/talis/Talis-Aspire-Primo-NDE-Integration/releases/download/latest/TalisAspireIntegration.zip` on a server - This URL will always point to the latest released version of this plugin.)
+- **Configuration Parameters** – JSON-based config parameters to be referenced at runtime by the add-on. The available parameters are discussed below.
 
 In Primo you will configure an addon: the screen looks like this
 
@@ -94,6 +95,15 @@ For most institutions, you only need to provide the two required fields:
 ```
 
 All optional fields will use their default values, and `httpBaseUrl` will be automatically generated.
+
+**Note:** If you get the error 'Talis Aspire baseUrl is required in configuration' in the live Primo instance, try removing the 'talisAspire' level in the JSON.\
+e.g.
+```json
+{
+  "baseUrl": "https://youruni.rl.talis.com/",
+  "mmsIdInstitutionCode": 1234
+}
+```
 
 ## Local Development Configuration
 
