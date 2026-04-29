@@ -45,7 +45,7 @@ if (match) {
     let webpackConfig = fs.readFileSync(webpackConfigPath, 'utf8');
     webpackConfig = webpackConfig.replace(/name:\s*["'][^"']+["']/, `name: "${addonName}"`);
     webpackConfig = webpackConfig.replace(/uniqueName:\s*["'][^"']+["']/, `uniqueName: "${addonName}"`);
-    webpackConfig = webpackConfig.replace(/["']\.\/[^"']+["']\s*:\s*["']\.\/src\/bootstrap[^"']*["']/, `"./custom-module": "./src/bootstrap${addonName}.ts"`);
+    webpackConfig = webpackConfig.replace(/["']\.\/[^"']+["']\s*:\s*["']\.\/src\/bootstrap[^"']*["']/, `"./${addonName}": "./src/bootstrap${addonName}.ts"`);
     fs.writeFileSync(webpackConfigPath, webpackConfig);
     console.log(`Updated webpack.config.js for addon: ${addonName}`);
 

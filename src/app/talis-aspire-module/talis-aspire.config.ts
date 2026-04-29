@@ -29,14 +29,14 @@ export const TALIS_ASPIRE_DEFAULTS = {
  * Get configuration with defaults applied
  */
 export function getTalisAspireConfig(moduleParameters: any): TalisAspireConfig {
-  if (!moduleParameters?.talisAspire) {
+  if (!moduleParameters?.talisAspire && !moduleParameters?.baseUrl) {
     console.error(
       'Talis Aspire configuration not found in MODULE_PARAMETERS. Please configure the add-on in Alma.',
     );
     throw new Error('Talis Aspire configuration missing');
   }
 
-  const config = moduleParameters.talisAspire;
+  const config = moduleParameters.talisAspire || moduleParameters;
 
   // Validate required fields
   if (!config.baseUrl) {
@@ -57,8 +57,10 @@ export function getTalisAspireConfig(moduleParameters: any): TalisAspireConfig {
       config.relatedListsDisplayLabel ??
       TALIS_ASPIRE_DEFAULTS.relatedListsDisplayLabel,
     displayBookmarkThisButton:
-      config.displayBookmarkThisButton ??
-      TALIS_ASPIRE_DEFAULTS.displayBookmarkThisButton,
+      config.displayBookmarkThisButton == null ?
+        TALIS_ASPIRE_DEFAULTS.displayBookmarkThisButton :
+        config.displayBookmarkThisButton === true ||
+        config.displayBookmarkThisButton === "true",
     bookmarkThisTitleAttribute:
       config.bookmarkThisTitleAttribute ??
       TALIS_ASPIRE_DEFAULTS.bookmarkThisTitleAttribute,
